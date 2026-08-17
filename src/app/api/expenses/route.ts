@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import { NextRequest } from 'next/server';
 import { connectDB } from '@/lib/db';
 import Expense from '@/models/Expense';
@@ -147,3 +148,4 @@ export async function POST(req: NextRequest) {
     return apiError(error.message || 'Failed to add expense', null, 500);
   }
 }
+

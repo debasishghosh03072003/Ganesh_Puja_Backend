@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import { NextRequest } from 'next/server';
 import { connectDB } from '@/lib/db';
 import User from '@/models/User';
@@ -167,3 +168,4 @@ export async function GET(req: NextRequest) {
     return apiError(error.message || 'Failed to fetch dashboard data', null, 500);
   }
 }
+
