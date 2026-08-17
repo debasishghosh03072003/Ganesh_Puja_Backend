@@ -83,7 +83,7 @@ export async function sendToTokens(tokens: string[], payload: FcmPayload): Promi
       android: {
         priority: 'high',
         notification: {
-          channelId: 'ganesh_puja_notifications',
+          channelId: 'ganesh_puja_notifications_v2',
           sound: 'ganesh_notification',
           priority: 'max',
           defaultSound: false,
@@ -121,3 +121,4 @@ export async function sendToTokens(tokens: string[], payload: FcmPayload): Promi
   console.log(`[FCM] Result: ${totalSuccess} success, ${totalFailure} failure, ${invalidTokens.length} invalid tokens`);
   return { successCount: totalSuccess, failureCount: totalFailure, invalidTokens };
 }
+
