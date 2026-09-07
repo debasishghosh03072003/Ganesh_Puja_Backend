@@ -1,4 +1,4 @@
-export const dynamic = 'force-dynamic';
+﻿export const dynamic = 'force-dynamic';
 import { NextRequest } from 'next/server';
 import { connectDB } from '@/lib/db';
 import Expense from '@/models/Expense';
@@ -6,6 +6,7 @@ import User from '@/models/User';
 import { getCurrentUser } from '@/lib/auth';
 import { apiSuccess, apiError, apiForbidden } from '@/lib/api-response';
 import { logActivity } from '@/lib/activity';
+import { sendAutoNotificationToAll } from '@/lib/notifications';
 
 // Helper to get current IST date bounds
 function getISTDateBounds() {
@@ -143,9 +144,18 @@ export async function POST(req: NextRequest) {
       .populate('paidBy', 'name mobile email profileImage')
       .populate('createdBy', 'name');
 
+    // ─── Auto-notify all members (fire-and-forget) ────────────────────────────
+    sendAutoNotificationToAll({
+      title: '💸 নতুন খরচ যোগ হয়েছে!',
+      body: `"${title}" খাতে ₹${Number(amount).toLocaleString('en-IN')} খরচ হয়েছে। (পরিশোধ: ${payer.name})`,
+      type: 'expense',
+      screen: 'expense',
+      sentBy: currentUser._id,
+    });
+    // ─────────────────────────────────────────────────────────────────────────
+
     return apiSuccess(populated, 'Expense recorded successfully', 201);
   } catch (error: any) {
     return apiError(error.message || 'Failed to add expense', null, 500);
   }
 }
-

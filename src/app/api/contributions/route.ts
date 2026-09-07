@@ -1,4 +1,4 @@
-import { NextRequest } from 'next/server';
+﻿import { NextRequest } from 'next/server';
 import { connectDB } from '@/lib/db';
 import Contribution from '@/models/Contribution';
 import User from '@/models/User';
@@ -6,6 +6,7 @@ import Settings from '@/models/Settings';
 import { getCurrentUser } from '@/lib/auth';
 import { apiSuccess, apiError, apiForbidden } from '@/lib/api-response';
 import { logActivity } from '@/lib/activity';
+import { sendAutoNotificationToAll } from '@/lib/notifications';
 
 export async function GET(req: NextRequest) {
   try {
@@ -101,6 +102,16 @@ export async function POST(req: NextRequest) {
     const populated = await Contribution.findById(contribution._id)
       .populate('member', 'name mobile email profileImage')
       .populate('addedBy', 'name');
+
+    // ─── Auto-notify all members (fire-and-forget) ────────────────────────────
+    sendAutoNotificationToAll({
+      title: '💰 নতুন চাঁদা জমা হয়েছে!',
+      body: `${memberUser.name} এর থেকে ₹${Number(amount).toLocaleString('en-IN')} চাঁদা জমা হয়েছে।`,
+      type: 'contribution',
+      screen: 'chanda',
+      sentBy: currentUser._id,
+    });
+    // ─────────────────────────────────────────────────────────────────────────
 
     return apiSuccess(populated, 'Contribution added successfully', 201);
   } catch (error: any) {

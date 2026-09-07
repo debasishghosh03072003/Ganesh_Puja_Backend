@@ -1,9 +1,10 @@
-import { NextRequest } from 'next/server';
+﻿import { NextRequest } from 'next/server';
 import { connectDB } from '@/lib/db';
 import OutsideContribution from '@/models/OutsideContribution';
 import { getCurrentUser } from '@/lib/auth';
 import { apiSuccess, apiError, apiForbidden } from '@/lib/api-response';
 import { logActivity } from '@/lib/activity';
+import { sendAutoNotificationToAll } from '@/lib/notifications';
 
 export async function GET(req: NextRequest) {
   try {
@@ -55,6 +56,16 @@ export async function POST(req: NextRequest) {
     });
 
     const populated = await OutsideContribution.findById(contribution._id).populate('addedBy', 'name');
+
+    // ─── Auto-notify all members (fire-and-forget) ────────────────────────────
+    sendAutoNotificationToAll({
+      title: '🎉 বাইরের দাতার চাঁদা এলো!',
+      body: `${donorName} ₹${Number(amount).toLocaleString('en-IN')} চাঁদা দিয়েছেন।`,
+      type: 'contribution',
+      screen: 'chanda',
+      sentBy: currentUser._id,
+    });
+    // ─────────────────────────────────────────────────────────────────────────
 
     return apiSuccess(populated, 'Outside donor recorded successfully', 201);
   } catch (error: any) {
